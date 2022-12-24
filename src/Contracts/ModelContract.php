@@ -4,6 +4,8 @@ namespace Tnpdigital\Cardinal\Hostfact\Contracts;
 
 interface ModelContract
 {
-    public static function find($id);
-    public static function all();
+    public static function add(array $params);
+    public function edit(array $params);
+    public static function show($Identifier);
+    public static function list(array $params);
 }
