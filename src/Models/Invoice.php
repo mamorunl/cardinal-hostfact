@@ -296,4 +296,15 @@ class Invoice extends Model implements ModelContract
 
         return true;
     }
+
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    public function paymentProcessReactivate(): bool
+    {
+        Client::sendRequest('invoice', 'paymentprocessreactivate', ['Identifier' => $this->Identifier]);
+
+        return true;
+    }
 }
