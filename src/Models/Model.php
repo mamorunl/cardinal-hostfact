@@ -2,8 +2,12 @@
 
 namespace Tnpdigital\Cardinal\Hostfact\Models;
 
+use Tnpdigital\Cardinal\Hostfact\Traits\HasAttributes;
+
 abstract class Model
 {
+    use HasAttributes;
+
     protected $attributes;
 
     public function setRawAttributes($attributes)
@@ -35,16 +39,5 @@ abstract class Model
     public function __set($key, $value)
     {
         $this->setAttribute($key, $value);
-    }
-
-    /**
-     * @param $key
-     * @param $value
-     *
-     * @return void
-     */
-    public function setAttribute($key, $value): void
-    {
-        $this->attributes[$key] = $value;
     }
 }

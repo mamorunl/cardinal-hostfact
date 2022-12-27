@@ -23,7 +23,6 @@ use Tnpdigital\Cardinal\Hostfact\Contracts\ModelContract;
  */
 class Invoice extends Model implements ModelContract
 {
-
     /**
      * @param array $params
      *
@@ -306,5 +305,10 @@ class Invoice extends Model implements ModelContract
         Client::sendRequest('invoice', 'paymentprocessreactivate', ['Identifier' => $this->Identifier]);
 
         return true;
+    }
+
+    public function add_invoiceline(InvoiceLine $invoice_line)
+    {
+
     }
 }
