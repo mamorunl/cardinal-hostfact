@@ -150,4 +150,26 @@ class Invoice extends Model implements ModelContract
 
         return true;
     }
+
+    /**
+     * @param int                 $identifier
+     * @param \Carbon\Carbon|null $pay_date
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public static function markAsPaid(int $identifier, Carbon $pay_date = null): bool
+    {
+        $params = [];
+
+        if(!is_null($pay_date)) {
+            $params['PayDate'] = $pay_date->format('Y-m-d');
+        }
+
+        $params['Identifier'] = $identifier;
+
+        Client::sendRequest('invoice', 'markaspaid', $params);
+
+        return true;
+    }
 }
