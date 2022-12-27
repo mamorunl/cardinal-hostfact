@@ -285,4 +285,15 @@ class Invoice extends Model implements ModelContract
 
         return true;
     }
+
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    public function paymentProcessPause(): bool
+    {
+        Client::sendRequest('invoice', 'paymentprocesspause', ['Identifier' => $this->Identifier]);
+
+        return true;
+    }
 }
