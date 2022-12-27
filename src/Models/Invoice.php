@@ -7,8 +7,23 @@ use Tnpdigital\Cardinal\Hostfact\Client;
 use Illuminate\Database\Eloquent\Collection;
 use Tnpdigital\Cardinal\Hostfact\Contracts\ModelContract;
 
+/**
+ * @property int Identifier
+ * @property string InvoiceCode
+ * @property int Debtor
+ * @property string DebtorCode
+ * @property int Status
+ * @property int SubStatus
+ * @property string Date
+ * @property int Term
+ * @property float AmountExcl
+ * @property float AmountTax
+ * @property float AmountIncl
+ * @property int TaxRate
+ */
 class Invoice extends Model implements ModelContract
 {
+
     /**
      * @param array $params
      *
@@ -42,14 +57,14 @@ class Invoice extends Model implements ModelContract
     public function edit(array $params = []): self
     {
         if (
-            (!array_key_exists('Identifier', $params) && !isset($this->attributes['Identifier'])) &&
-            (!array_key_exists('InvoiceCode', $params) && !isset($this->attributes['InvoiceCode']))) {
+            (!array_key_exists('Identifier', $params) && !isset($this->Identifier)) &&
+            (!array_key_exists('InvoiceCode', $params) && !isset($this->InvoiceCode))) {
             throw new \Exception('Identifier or InvoiceCode are required fields');
         }
 
-        $params['Identifier'] = $this->attributes['Identifier'];
+        $params['Identifier'] = $this->Identifier;
 
-        $response = Client::sendRequest('invoice', 'edit', $params);
+        Client::sendRequest('invoice', 'edit', $params);
 
         $this->setRawAttributes($params);
 
@@ -98,44 +113,39 @@ class Invoice extends Model implements ModelContract
     }
 
     /**
-     * @param int $identifier
-     *
      * @return bool
      * @throws \Exception
      */
-    public static function delete(int $identifier): bool
+    public function delete(): bool
     {
         Client::sendRequest('invoice', 'delete', [
-            'Identifier' => $identifier
+            'Identifier' => $this->Identifier
         ]);
 
         return true;
     }
 
     /**
-     * @param int $identifier
-     *
      * @return bool
      * @throws \Exception
      */
-    public static function credit(int $identifier): bool
+    public function credit(): bool
     {
         Client::sendRequest('invoice', 'credit', [
-            'Identifier' => $identifier
+            'Identifier' => $this->Identifier
         ]);
 
         return true;
     }
 
     /**
-     * @param int                 $identifier
      * @param float               $amount_paid
      * @param \Carbon\Carbon|null $pay_date
      *
      * @return bool
      * @throws \Exception
      */
-    public static function partPayment(int $identifier, float $amount_paid, Carbon $pay_date = null): bool
+    public function partPayment(float $amount_paid, Carbon $pay_date = null): bool
     {
         $params = [];
 
@@ -143,7 +153,7 @@ class Invoice extends Model implements ModelContract
             $params['PayDate'] = $pay_date->format('Y-m-d');
         }
 
-        $params['Identifier'] = $identifier;
+        $params['Identifier'] = $this->Identifier;
         $params['AmountPaid'] = $amount_paid;
 
         Client::sendRequest('invoice', 'partpayment', $params);
@@ -152,13 +162,12 @@ class Invoice extends Model implements ModelContract
     }
 
     /**
-     * @param int                 $identifier
      * @param \Carbon\Carbon|null $pay_date
      *
      * @return bool
      * @throws \Exception
      */
-    public static function markAsPaid(int $identifier, Carbon $pay_date = null): bool
+    public function markAsPaid(Carbon $pay_date = null): bool
     {
         $params = [];
 
@@ -166,7 +175,7 @@ class Invoice extends Model implements ModelContract
             $params['PayDate'] = $pay_date->format('Y-m-d');
         }
 
-        $params['Identifier'] = $identifier;
+        $params['Identifier'] = $this->Identifier;
 
         Client::sendRequest('invoice', 'markaspaid', $params);
 
@@ -174,14 +183,45 @@ class Invoice extends Model implements ModelContract
     }
 
     /**
-     * @param int $identifier
-     *
      * @return bool
      * @throws \Exception
      */
-    public static function markAsUnpaid(int $identifier): bool
+    public function markAsUnpaid(): bool
     {
-        Client::sendRequest('invoice', 'markasunpaid', ['Identifier' => $identifier]);
+        Client::sendRequest('invoice', 'markasunpaid', ['Identifier' => $this->Identifier]);
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    public function sendByEmail(): bool
+    {
+        Client::sendRequest('invoice', 'sendbymail', ['Identifier' => $this->Identifier]);
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    public function sendReminderByEmail(): bool
+    {
+        Client::sendRequest('invoice', 'sendreminderbyemail', ['Identifier' => $this->Identifier]);
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    public function sendSummationByEmail(): bool
+    {
+        Client::sendRequest('invoice', 'sendsummationbyemail', ['Identifier' => $this->Identifier]);
 
         return true;
     }
