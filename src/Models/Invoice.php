@@ -172,4 +172,17 @@ class Invoice extends Model implements ModelContract
 
         return true;
     }
+
+    /**
+     * @param int $identifier
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public static function markAsUnpaid(int $identifier): bool
+    {
+        Client::sendRequest('invoice', 'markasunpaid', ['Identifier' => $identifier]);
+
+        return true;
+    }
 }
