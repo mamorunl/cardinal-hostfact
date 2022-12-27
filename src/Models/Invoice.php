@@ -225,4 +225,15 @@ class Invoice extends Model implements ModelContract
 
         return true;
     }
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function download(): array
+    {
+        $response = Client::sendRequest('invoice', 'download', ['Identifier' => $this->Identifier]);
+
+        return $response['invoice'];
+    }
 }
