@@ -50,10 +50,6 @@ class Debtor extends Model implements ModelContract
 
         $response = Client::sendRequest('debtor', 'edit', $params);
 
-        if(strcasecmp($response['status'], 'success')) {
-            throw new \Exception($response['errors'][0]);
-        }
-
         $this->setRawAttributes($params);
 
         return $this;
@@ -70,10 +66,6 @@ class Debtor extends Model implements ModelContract
         $response = Client::sendRequest('debtor', 'show', [
             'Identifier' => $Identifier
         ]);
-
-        if (strcasecmp($response['status'], 'success')) {
-            throw new \Exception($response['errors'][0]);
-        }
 
         $debtor = new static;
         $debtor->setRawAttributes($response['debtor']);
@@ -92,10 +84,6 @@ class Debtor extends Model implements ModelContract
         $response = Client::sendRequest('debtor', 'list', [
             'limit' => 1000
         ] + $params);
-
-        if (strcasecmp($response['status'], 'success')) {
-            throw new \Exception($response['errors'][0]);
-        }
 
         $debtors = [];
         $response = $response['debtors'];

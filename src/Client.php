@@ -34,17 +34,15 @@ class Client
         $curlError = curl_error($ch);
 
         if ($curlError != '') {
-            $result = [
-                'controller' => 'invalid',
-                'action'     => 'invalid',
-                'status'     => 'error',
-                'date'       => date('c'),
-                'errors'     => [ $curlError ]
-            ];
+            throw new \Exception('Result canceled due to Curl Error: ' . $curlError);
         } else {
             $result = json_decode($curlResp, true);
 
             if(!strcasecmp($result['status'], 'error') && !strcasecmp($result['errors'][0], 'API key is invalid')) {
+                throw new \Exception($result['errors'][0]);
+            }
+
+            if(strcasecmp($result['status'], 'success')) {
                 throw new \Exception($result['errors'][0]);
             }
         }
