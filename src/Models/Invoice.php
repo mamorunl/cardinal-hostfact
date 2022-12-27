@@ -2,6 +2,7 @@
 
 namespace Tnpdigital\Cardinal\Hostfact\Models;
 
+use Carbon\Carbon;
 use Tnpdigital\Cardinal\Hostfact\Client;
 use Illuminate\Database\Eloquent\Collection;
 use Tnpdigital\Cardinal\Hostfact\Contracts\ModelContract;
@@ -104,17 +105,49 @@ class Invoice extends Model implements ModelContract
      */
     public static function delete(int $identifier): bool
     {
-        $response = Client::sendRequest('invoice', 'delete', [
+        Client::sendRequest('invoice', 'delete', [
             'Identifier' => $identifier
         ]);
 
         return true;
     }
 
-    public static function credit(int $identifier)
+    /**
+     * @param int $identifier
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public static function credit(int $identifier): bool
     {
-        $response = Client::sendRequest('invoice', 'credit', [
+        Client::sendRequest('invoice', 'credit', [
             'Identifier' => $identifier
         ]);
+
+        return true;
+    }
+
+    /**
+     * @param int                 $identifier
+     * @param float               $amount_paid
+     * @param \Carbon\Carbon|null $pay_date
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public static function partPayment(int $identifier, float $amount_paid, Carbon $pay_date = null): bool
+    {
+        $params = [];
+
+        if(!is_null($pay_date)) {
+            $params['PayDate'] = $pay_date->format('Y-m-d');
+        }
+
+        $params['Identifier'] = $identifier;
+        $params['AmountPaid'] = $amount_paid;
+
+        Client::sendRequest('invoice', 'partpayment', $params);
+
+        return true;
     }
 }
