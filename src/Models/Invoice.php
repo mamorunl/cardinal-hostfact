@@ -236,4 +236,26 @@ class Invoice extends Model implements ModelContract
 
         return $response['invoice'];
     }
+
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    public function block(): bool
+    {
+        Client::sendRequest('invoice', 'block', ['Identifier' => $this->Identifier]);
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    public function unblock(): bool
+    {
+        Client::sendRequest('invoice', 'unblock', ['Identifier' => $this->Identifier]);
+
+        return true;
+    }
 }
