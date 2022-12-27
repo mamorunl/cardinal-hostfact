@@ -274,4 +274,15 @@ class Invoice extends Model implements ModelContract
 
         return true;
     }
+
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    public function cancelSchedule(): bool
+    {
+        Client::sendRequest('invoice', 'cancelschedule', ['Identifier' => $this->Identifier]);
+
+        return true;
+    }
 }
