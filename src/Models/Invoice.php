@@ -258,4 +258,20 @@ class Invoice extends Model implements ModelContract
 
         return true;
     }
+
+    /**
+     * @param \Carbon\Carbon $schedule_at
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function schedule(Carbon $schedule_at): bool
+    {
+        Client::sendRequest('invoice', 'schedule', [
+            'Identifier' => $this->Identifier,
+            'ScheduledAt' => $schedule_at->format('Y-m-d H:i:s')
+        ]);
+
+        return true;
+    }
 }
