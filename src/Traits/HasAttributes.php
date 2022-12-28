@@ -3,10 +3,13 @@
 namespace Tnpdigital\Cardinal\Hostfact\Traits;
 
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 
 trait HasAttributes
 {
     protected $dates = [];
+
+    protected $attributes = [];
 
     /**
      * Determine if the given attribute is a date or date castable.
@@ -25,7 +28,7 @@ trait HasAttributes
      *
      * @return void
      */
-    public function setAttribute($key, $value): void
+    protected function setAttribute($key, $value): void
     {
         if(!is_null($value) && $this->isDateAttribute($key)) {
             $value = $this->setDateTimeAttribute($value);
@@ -41,10 +44,50 @@ trait HasAttributes
      */
     protected function setDateTimeAttribute($value)
     {
-        if($value instanceof Carbon) {
+        if($value instanceof CarbonInterface) {
             return $value;
         }
 
-        return empty($value) ? $value : Carbon::createFromFormat('Y-m-d', $value);
+        if(empty($value)) {
+            return $value;
+        }
+
+        if($this->isStandardDateFormat($value)) {
+            $value = Carbon::createFromFormat('Y-m-d', $value)->startOfDay();
+        } else {
+            $value = Carbon::createFromFormat('Y-m-d H:i:s', $value);
+        }
+
+        return $value;
+    }
+
+    /**
+     * Add the date attributes to the attributes array.
+     *
+     * @param  array  $attributes
+     * @return array
+     */
+    protected function addDateAttributesToArray(array $attributes)
+    {
+        foreach ($this->dates as $key) {
+            if (empty($attributes[$key])) {
+                continue;
+            }
+
+            $attributes[$key] = $attributes[$key]->format('Y-m-d');
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Determine if the given value is a standard date format.
+     *
+     * @param  string  $value
+     * @return bool
+     */
+    protected function isStandardDateFormat($value)
+    {
+        return preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})$/', $value);
     }
 }

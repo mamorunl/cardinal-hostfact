@@ -2,10 +2,9 @@
 
 namespace Tnpdigital\Cardinal\Hostfact\Models;
 
-use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Tnpdigital\Cardinal\Hostfact\Client;
 use Illuminate\Database\Eloquent\Collection;
-use Tnpdigital\Cardinal\Hostfact\Contracts\ModelContract;
 
 /**
  * @property int Identifier
@@ -21,23 +20,39 @@ use Tnpdigital\Cardinal\Hostfact\Contracts\ModelContract;
  * @property float AmountIncl
  * @property int TaxRate
  */
-class Invoice extends Model implements ModelContract
+class Invoice extends Model
 {
+    protected $invoiceLines;
+
     /**
      * @param array $params
      *
      * @return $this
      * @throws \Exception
      */
-    public static function add(array $params = []): static
+    public function create(): static
     {
-        if (!array_key_exists('Debtor', $params) && !array_key_exists('DebtorCode', $params)) {
+        if(isset($this->Identifier)) {
+            throw new \Exception('Identifier already set. Use UPDATE instead');
+        }
+
+        if (!array_key_exists('Debtor', $this->attributes) && !array_key_exists('DebtorCode', $this->attributes)) {
             throw new \Exception('Debtor or DebtorCode are required fields');
         }
 
-        if (!array_key_exists('InvoiceLines', $params)) {
+        if (!$this->invoiceLines()->count()) {
             throw new \Exception('InvoiceLines is a required field');
         }
+
+        $invoice_lines = [];
+
+        foreach($this->invoiceLines() as $invoice_line) {
+            $invoice_lines[] = $invoice_line->toArray();
+        }
+
+        $params = $this->toArray();
+
+        $params['InvoiceLines'] = $invoice_lines;
 
         $response = Client::sendRequest('invoice', 'add', $params);
 
@@ -144,7 +159,7 @@ class Invoice extends Model implements ModelContract
      * @return bool
      * @throws \Exception
      */
-    public function partPayment(float $amount_paid, Carbon $pay_date = null): bool
+    public function partPayment(float $amount_paid, CarbonInterface $pay_date = null): bool
     {
         $params = [];
 
@@ -166,7 +181,7 @@ class Invoice extends Model implements ModelContract
      * @return bool
      * @throws \Exception
      */
-    public function markAsPaid(Carbon $pay_date = null): bool
+    public function markAsPaid(CarbonInterface $pay_date = null): bool
     {
         $params = [];
 
@@ -264,7 +279,7 @@ class Invoice extends Model implements ModelContract
      * @return bool
      * @throws \Exception
      */
-    public function schedule(Carbon $schedule_at): bool
+    public function schedule(CarbonInterface $schedule_at): bool
     {
         Client::sendRequest('invoice', 'schedule', [
             'Identifier' => $this->Identifier,
@@ -307,8 +322,29 @@ class Invoice extends Model implements ModelContract
         return true;
     }
 
-    public function add_invoiceline(InvoiceLine $invoice_line)
+    /**
+     * @return \Illuminate\Support\Collection
+     */
+    public function invoiceLines(): \Illuminate\Support\Collection
     {
+        if($this->invoiceLines instanceof \Illuminate\Support\Collection) {
+            return $this->invoiceLines;
+        }
 
+        if(empty($this->attributes['InvoiceLines'])) {
+            return $this->invoiceLines = new \Illuminate\Support\Collection();
+        }
+
+        $invoice_lines = [];
+        foreach ($this->attributes['InvoiceLines'] as $invoice_line) {
+            $line = new InvoiceLine();
+            $line->fill($invoice_line);
+
+            $invoice_lines[] = $line;
+        }
+
+        $this->invoiceLines = collect($invoice_lines);
+
+        return $this->invoiceLines;
     }
 }

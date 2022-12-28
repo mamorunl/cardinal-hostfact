@@ -2,13 +2,12 @@
 
 namespace Tnpdigital\Cardinal\Hostfact\Models;
 
+use Illuminate\Contracts\Support\Arrayable;
 use Tnpdigital\Cardinal\Hostfact\Traits\HasAttributes;
 
-abstract class Model
+abstract class Model implements Arrayable
 {
     use HasAttributes;
-
-    protected $attributes;
 
     public function setRawAttributes($attributes)
     {
@@ -39,5 +38,24 @@ abstract class Model
     public function __set($key, $value)
     {
         $this->setAttribute($key, $value);
+    }
+
+    /**
+     * @param $attributes
+     *
+     * @return void
+     */
+    public function fill($attributes)
+    {
+        foreach ($attributes as $key => $value) {
+            $this->setAttribute($key, $value);
+        }
+    }
+
+    public function toArray()
+    {
+        $attributes = $this->addDateAttributesToArray($this->attributes);
+
+        return $attributes;
     }
 }
