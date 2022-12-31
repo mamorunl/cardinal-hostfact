@@ -9,6 +9,8 @@ abstract class Model implements Arrayable
 {
     use HasAttributes;
 
+    protected $excluded = [];
+
     public function setRawAttributes($attributes)
     {
         $this->attributes = $attributes;
@@ -55,6 +57,10 @@ abstract class Model implements Arrayable
     public function toArray()
     {
         $attributes = $this->addDateAttributesToArray($this->attributes);
+
+        foreach ($this->excluded as $item) {
+            unset($attributes[$item]);
+        }
 
         return $attributes;
     }

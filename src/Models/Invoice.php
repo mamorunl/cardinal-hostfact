@@ -30,7 +30,7 @@ class Invoice extends Model
      * @return $this
      * @throws \Exception
      */
-    public function create(): static
+    public function create(): self
     {
         if(isset($this->Identifier)) {
             throw new \Exception('Identifier already set. Use UPDATE instead');
@@ -40,26 +40,14 @@ class Invoice extends Model
             throw new \Exception('Debtor or DebtorCode are required fields');
         }
 
-        if (!$this->invoiceLines()->count()) {
-            throw new \Exception('InvoiceLines is a required field');
-        }
-
-        $invoice_lines = [];
-
-        foreach($this->invoiceLines() as $invoice_line) {
-            $invoice_lines[] = $invoice_line->toArray();
-        }
-
-        $params = $this->toArray();
-
-        $params['InvoiceLines'] = $invoice_lines;
+        $params = $this->generateParams();
 
         $response = Client::sendRequest('invoice', 'add', $params);
 
-        $invoice = new static;
-        $invoice->setRawAttributes($response['invoice']);
+        $this->setRawAttributes($response['invoice']);
+        unset($this->invoiceLines);
 
-        return $invoice;
+        return $this;
     }
 
     /**
@@ -68,19 +56,22 @@ class Invoice extends Model
      * @return $this
      * @throws \Exception
      */
-    public function edit(array $params = []): self
+    public function update(array $params = []): self
     {
         if (
-            (!array_key_exists('Identifier', $params) && !isset($this->Identifier)) &&
-            (!array_key_exists('InvoiceCode', $params) && !isset($this->InvoiceCode))) {
+            (!array_key_exists('Identifier', $params) && !isset($this->attributes['Identifier'])) &&
+            (!array_key_exists('InvoiceCode', $params) && !isset($this->attributes['InvoiceCode']))) {
             throw new \Exception('Identifier or InvoiceCode are required fields');
         }
 
-        $params['Identifier'] = $this->Identifier;
+        $this->fill($params);
 
-        Client::sendRequest('invoice', 'edit', $params);
+        $params = $this->generateParams();
 
-        $this->setRawAttributes($params);
+        $response = Client::sendRequest('invoice', 'edit', $params);
+
+        $this->setRawAttributes($response['invoice']);
+        unset($this->invoiceLines);
 
         return $this;
     }
@@ -346,5 +337,29 @@ class Invoice extends Model
         $this->invoiceLines = collect($invoice_lines);
 
         return $this->invoiceLines;
+    }
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    private function generateParams(): array
+    {
+        if (!$this->invoiceLines()
+                  ->count()) {
+            throw new \Exception('InvoiceLines is a required field');
+        }
+
+        $invoice_lines = [];
+
+        foreach ($this->invoiceLines() as $invoice_line) {
+            $invoice_lines[] = $invoice_line->toArray();
+        }
+
+        $params = $this->toArray();
+
+        $params['InvoiceLines'] = $invoice_lines;
+
+        return $params;
     }
 }
