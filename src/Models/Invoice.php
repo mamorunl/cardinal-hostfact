@@ -25,8 +25,6 @@ class Invoice extends Model
     protected $invoiceLines;
 
     /**
-     * @param array $params
-     *
      * @return $this
      * @throws \Exception
      */
@@ -77,24 +75,6 @@ class Invoice extends Model
     }
 
     /**
-     * @param $Identifier
-     *
-     * @return static
-     * @throws \Exception
-     */
-    public static function show($Identifier): static
-    {
-        $response = Client::sendRequest('invoice', 'show', [
-            'Identifier' => $Identifier
-        ]);
-
-        $debtor = new static;
-        $debtor->setRawAttributes($response['invoice']);
-
-        return $debtor;
-    }
-
-    /**
      * @param array $params
      *
      * @return \Illuminate\Database\Eloquent\Collection
@@ -115,19 +95,6 @@ class Invoice extends Model
         }
 
         return new Collection($invoices);
-    }
-
-    /**
-     * @return bool
-     * @throws \Exception
-     */
-    public function delete(): bool
-    {
-        Client::sendRequest('invoice', 'delete', [
-            'Identifier' => $this->Identifier
-        ]);
-
-        return true;
     }
 
     /**

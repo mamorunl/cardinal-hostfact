@@ -2,6 +2,7 @@
 
 namespace Tnpdigital\Cardinal\Hostfact\Models;
 
+use Tnpdigital\Cardinal\Hostfact\Client;
 use Illuminate\Contracts\Support\Arrayable;
 use Tnpdigital\Cardinal\Hostfact\Traits\HasAttributes;
 
@@ -63,5 +64,40 @@ abstract class Model implements Arrayable
         }
 
         return $attributes;
+    }
+
+    /**
+     * @param $Identifier
+     *
+     * @return static
+     * @throws \Exception
+     */
+    public static function show($Identifier): static
+    {
+        $class_name = strtolower(class_basename(get_called_class()));
+
+        $response = Client::sendRequest($class_name, 'show', [
+            'Identifier' => $Identifier
+        ]);
+
+        $debtor = new static;
+        $debtor->setRawAttributes($response[$class_name]);
+
+        return $debtor;
+    }
+
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    public function delete(): bool
+    {
+        $class_name = strtolower(class_basename(get_called_class()));
+
+        Client::sendRequest($class_name, 'delete', [
+            'Identifier' => $this->Identifier
+        ]);
+
+        return true;
     }
 }
