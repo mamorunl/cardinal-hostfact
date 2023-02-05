@@ -2,7 +2,9 @@
 
 namespace Tnpdigital\Cardinal\Hostfact;
 
-class HostfactServiceProvider
+use Illuminate\Support\ServiceProvider;
+
+class HostfactServiceProvider extends ServiceProvider
 {
     public function boot()
     {
